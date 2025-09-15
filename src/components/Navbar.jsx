@@ -13,9 +13,9 @@ import {
 } from 'react-icons/fa';
 import { auth } from '../firebase';
 
-const Navbar = ({ setUser }) => {
+const Navbar = ({ user, setUser, handleSignOut }) => {
   const location = useLocation();
-  const navigate = useNavigate(); // Added for navigation
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeHover, setActiveHover] = useState(null);
 
@@ -26,16 +26,6 @@ const Navbar = ({ setUser }) => {
     }
   }, [location]);
 
-  const handleLogout = async () => {
-    try {
-      await auth.signOut();
-      setUser(null);
-      navigate('/Signup'); // Navigate to Signup page after logout
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
-
   const navItems = [
     { to: '/', icon: <FaHome size={24} />, text: 'Home' },
     { to: '/transactions', icon: <FaMoneyBill size={24} />, text: 'Transactions' },
@@ -45,11 +35,13 @@ const Navbar = ({ setUser }) => {
     { to: '/calculator', icon: <FaCalculator size={24} />, text: 'Calculator' },
     { to: '/chatbot', icon: <FaRobot size={24} />, text: 'Chatbot' },
     { to: '/education', icon: <FaGraduationCap size={24} />, text: 'Finance Education' },
-    { to: '/logout', icon: <FaSignOutAlt size={24} />, text: 'Logout', onClick: handleLogout },
   ];
 
   return (
     <>
+      {/* Import Google Font */}
+      <link href="https://fonts.googleapis.com/css2?family=Economica:wght@700&display=swap" rel="stylesheet" />
+      
       {/* Mobile overlay */}
       {isExpanded && (
         <div 
@@ -71,11 +63,18 @@ const Navbar = ({ setUser }) => {
       <nav 
         className={`fixed top-0 left-0 bottom-0 w-64 bg-emerald-100 border-r border-emerald-300 p-4 flex flex-col items-start justify-start overflow-y-auto z-50 transition-all duration-500 ease-in-out ${isExpanded ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
-        {/* Logo/Brand */}
+        {/* User Info */}
         <div className="w-full py-6 mb-4 flex items-center justify-center border-b border-emerald-300">
-          <div className="text-xl font-bold text-emerald-800">
-            <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent">$</span> 
-            Finance Manager
+          <div className="flex flex-col items-center gap-2">
+            <span className="text-4xl font-bold text-emerald-800" style={{ fontFamily: 'Economica, sans-serif' }}>
+              SmartSpend
+            </span>
+            <img
+              src={user.photoURL}
+              alt="profile"
+              className="w-20 h-20 rounded-full"
+            />
+            <span className="text-lg font-bold text-emerald-800">{user.displayName}</span>
           </div>
         </div>
 
@@ -92,7 +91,6 @@ const Navbar = ({ setUser }) => {
               onMouseEnter={() => setActiveHover(index)}
               onMouseLeave={() => setActiveHover(null)}
               onClick={() => {
-                if (item.onClick) item.onClick();
                 if (window.innerWidth < 768) setIsExpanded(false);
               }}
             >
@@ -126,8 +124,18 @@ const Navbar = ({ setUser }) => {
           ))}
         </div>
 
-        {/* Footer with decorative elements */}
+        {/* Logout Button */}
         <div className="mt-auto w-full pt-6 border-t border-emerald-300">
+          <button
+            onClick={() => {
+              handleSignOut();
+              if (window.innerWidth < 768) setIsExpanded(false);
+            }}
+            className="flex items-center space-x-4 p-3 w-full rounded-xl text-emerald-800 hover:bg-emerald-200 transition-all duration-300"
+          >
+            <FaSignOutAlt size={24} className="text-amber-600 hover:text-amber-700" />
+            <span className="text-sm font-medium">Logout</span>
+          </button>
           <div className="flex justify-center">
             <div className="h-1 w-16 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 mb-4" />
           </div>

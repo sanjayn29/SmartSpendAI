@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
@@ -13,9 +12,7 @@ import Progress from "./pages/Progress";
 import Navbar from "./components/Navbar";
 import About from "./pages/About";
 import Signup from "./pages/Signup";
-// src/App.jsx
 import { auth, signOut } from "./firebase";
-
 
 function App() {
   const [user, setUser] = useState(null);
@@ -32,24 +29,7 @@ function App() {
           <Signup setUser={setUser} />
         ) : (
           <>
-            <Navbar />
-            <div className="flex justify-between items-center px-6 py-3 bg-gray-900">
-              <div className="flex items-center gap-3">
-                <img
-                  src={user.photoURL}
-                  alt="profile"
-                  className="w-10 h-10 rounded-full"
-                />
-                <span>{user.displayName}</span>
-              </div>
-              <button
-                onClick={handleSignOut}
-                className="px-4 py-2 bg-red-600 rounded hover:bg-red-700"
-              >
-                Sign Out
-              </button>
-            </div>
-
+            <Navbar user={user} handleSignOut={handleSignOut} setUser={setUser} />
             <Routes>
               <Route path="/" element={<Home user={user} />} />
               <Route path="/savings" element={<Savings />} />
