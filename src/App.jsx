@@ -11,6 +11,7 @@ import Budget from "./pages/Budget";
 import Alerts from "./pages/Alerts";
 import Education from "./pages/Education";
 import Progress from "./pages/Progress";
+import Calculator from "./pages/Calculator"; // Add Calculator import
 import Navbar from "./components/Navbar";
 import About from "./pages/About";
 import Signup from "./pages/Signup";
@@ -69,6 +70,7 @@ function App() {
                 <Route path="/progress" element={<Progress />} />
                 <Route path="/profile" element={<Profile user={user} />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/calculator" element={<Calculator />} /> {/* Add Calculator route */}
               </Routes>
             </div>
           )}
