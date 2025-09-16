@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { auth, signOut } from "./firebase"; // Keep these for the auth instance and signOut
 import { onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged directly from Firebase
 import Home from "./pages/Home";
-import Profile from "./pages/Profile";
+import Chatbot from "./pages/Chatbot";
 import Savings from "./pages/Savings";
 import Assistant from "./pages/Assistant";
 import Overview from "./pages/Overview";
@@ -68,7 +68,7 @@ function App() {
                 <Route path="/alerts" element={<Alerts />} />
                 <Route path="/education" element={<Education />} />
                 <Route path="/progress" element={<Progress />} />
-                <Route path="/profile" element={<Profile user={user} />} />
+                <Route path="/chatbot" element={<Chatbot user={user} />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/calculator" element={<Calculator />} /> {/* Add Calculator route */}
               </Routes>
