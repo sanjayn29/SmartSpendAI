@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore"; // Import Firestore functions
 
 const firebaseConfig = {
   apiKey: "AIzaSyAm-lJ_6vdSn28foMTZ8aUx98oLSDHbQ8w",
@@ -14,9 +15,13 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// ✅ Auth setup
+// Auth setup
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+setPersistence(auth, browserLocalPersistence);
 
-// ✅ Make sure these are exported
-export { auth, provider, signInWithPopup, signOut };
+// Firestore setup
+const db = getFirestore(app);
+
+// Export all necessary modules
+export { auth, provider, signInWithPopup, signOut, db, doc, setDoc };

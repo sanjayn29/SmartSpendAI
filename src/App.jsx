@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { auth, signOut } from "./firebase"; // Keep these for the auth instance and signOut
+import { onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged directly from Firebase
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Savings from "./pages/Savings";
@@ -12,15 +14,34 @@ import Progress from "./pages/Progress";
 import Navbar from "./components/Navbar";
 import About from "./pages/About";
 import Signup from "./pages/Signup";
-import { auth, signOut } from "./firebase";
 
 function App() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Add loading state
+
+  useEffect(() => {
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setLoading(false); // Set loading to false once auth state is resolved
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
 
   const handleSignOut = async () => {
-    await signOut(auth);
-    setUser(null);
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error("Sign-out error:", error);
+    }
   };
+
+  if (loading) {
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>; // Improved loading UI
+  }
 
   return (
     <Router>

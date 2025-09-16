@@ -1,6 +1,5 @@
-// src/pages/Signup.jsx
 import React from "react";
-import { auth, provider, signInWithPopup } from "../firebase"; 
+import { auth, provider, signInWithPopup, db, doc, setDoc } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaPiggyBank, FaChartLine, FaCoins, FaMoneyCheckAlt } from "react-icons/fa";
@@ -11,10 +10,24 @@ function Signup({ setUser }) {
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
-      navigate("/"); // redirect to home after login
+      const user = result.user;
+
+      // Save user data to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        createdAt: new Date().toISOString(),
+        budgetPreferences: {}, // Example field
+        financialGoals: [], // Example field
+      }, { merge: true });
+
+      setUser(user);
+      navigate("/"); // Redirect to home after login
     } catch (error) {
       console.error("Google sign-in error:", error);
+      alert("Failed to sign in with Google. Please try again.");
     }
   };
 
@@ -75,7 +88,7 @@ function Signup({ setUser }) {
         <p className="text-center text-emerald-600 text-sm mt-6">
           By signing in, you agree to our Terms and Privacy Policy
         </p>
-      </div>
+      </div>  
 
       {/* Animated circles in background */}
       <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-amber-200 opacity-30 animate-pulse"></div>
