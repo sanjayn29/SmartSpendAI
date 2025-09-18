@@ -28,9 +28,9 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
 
   const navItems = [
     { to: "/", icon: <FaHome size={24} />, text: "Home" },
-    { to: "/transactions", icon: <FaMoneyBill size={24} />, text: "Transactions" }, // Ensure this is present
+    { to: "/transactions", icon: <FaMoneyBill size={24} />, text: "Transactions" },
     { to: "/dashboard", icon: <FaChartPie size={24} />, text: "Dashboard" },
-    { to: "/budget", icon: <FaCreditCard size={24} />, text: "Budget Planner" },
+    { to: "/budget", icon: <FaCreditCard size={24} />, text: "Budget Planner" }, // Updated text and ensured correct icon
     { to: "/about", icon: <FaInfoCircle size={24} />, text: "About" },
     { to: "/calculator", icon: <FaCalculator size={24} />, text: "Calculator" },
     { to: "/chatbot", icon: <FaRobot size={24} />, text: "Chatbot" },

@@ -10,6 +10,7 @@ import Navbar from "./components/Navbar";
 import About from "./pages/About";
 import Signup from "./pages/Signup";
 import Transaction from "./pages/Transaction";
+import BudgetPlanner from "./pages/BudgetPlanner";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -55,6 +56,25 @@ function App() {
                   path="/transactions"
                   element={<Transaction user={user} />} // Pass user prop
                 />
+                <Route
+                  path="/budget"
+                  element={<BudgetPlanner user={user} />} // Add BudgetPlanner route
+                />
+                {/* Add Dashboard route to fix the warning */}
+                <Route path="/dashboard" element={
+                  <div className="text-center py-12">
+                    <h1 className="text-4xl font-bold text-green-500 mb-4">Dashboard</h1>
+                    <p className="text-gray-400">Coming soon! This will show your financial overview.</p>
+                  </div>
+                } />
+                {/* Catch-all route for unmatched paths */}
+                <Route path="*" element={
+                  <div className="text-center py-12">
+                    <h1 className="text-2xl font-bold text-red-500 mb-4">404 - Page Not Found</h1>
+                    <p className="text-gray-400">The page you're looking for doesn't exist.</p>
+                    <a href="/" className="text-green-500 hover:underline mt-4 inline-block">Go to Home</a>
+                  </div>
+                } />
               </Routes>
             </div>
           )}
