@@ -1,7 +1,10 @@
+// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, setPersistence, browserLocalPersistence } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore"; // Import Firestore functions
+import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, serverTimestamp } from "firebase/firestore"; // Import Firestore functions
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAm-lJ_6vdSn28foMTZ8aUx98oLSDHbQ8w",
   authDomain: "aismartspend.firebaseapp.com",
@@ -14,14 +17,27 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
-// Auth setup
+// Initialize Auth
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 setPersistence(auth, browserLocalPersistence);
 
-// Firestore setup
+// Initialize Firestore
 const db = getFirestore(app);
 
-// Export all necessary modules
-export { auth, provider, signInWithPopup, signOut, db, doc, setDoc };
+// Export the functions and services
+export { 
+  auth, 
+  provider, 
+  signInWithPopup, 
+  signOut, 
+  db, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc, 
+  arrayUnion, 
+  serverTimestamp 
+};

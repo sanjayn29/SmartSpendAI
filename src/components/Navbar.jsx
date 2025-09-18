@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   FaHome, 
   FaMoneyBill, 
@@ -10,8 +10,8 @@ import {
   FaRobot,
   FaGraduationCap,
   FaSignOutAlt
-} from 'react-icons/fa';
-import { auth } from '../firebase';
+} from "react-icons/fa";
+import { auth } from "../firebase";
 
 const Navbar = ({ user, setUser, handleSignOut }) => {
   const location = useLocation();
@@ -27,19 +27,19 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
   }, [location]);
 
   const navItems = [
-    { to: '/', icon: <FaHome size={24} />, text: 'Home' },
-    { to: '/transactions', icon: <FaMoneyBill size={24} />, text: 'Transactions' },
-    { to: '/dashboard', icon: <FaChartPie size={24} />, text: 'Dashboard' },
-    { to: '/budget', icon: <FaCreditCard size={24} />, text: 'Budget Planner' },
-    { to: '/about', icon: <FaInfoCircle size={24} />, text: 'About' },
-    { to: '/calculator', icon: <FaCalculator size={24} />, text: 'Calculator' },
-    { to: '/chatbot', icon: <FaRobot size={24} />, text: 'Chatbot' },
-    { to: '/education', icon: <FaGraduationCap size={24} />, text: 'Finance Education' },
+    { to: "/", icon: <FaHome size={24} />, text: "Home" },
+    { to: "/transactions", icon: <FaMoneyBill size={24} />, text: "Transactions" }, // Ensure this is present
+    { to: "/dashboard", icon: <FaChartPie size={24} />, text: "Dashboard" },
+    { to: "/budget", icon: <FaCreditCard size={24} />, text: "Budget Planner" },
+    { to: "/about", icon: <FaInfoCircle size={24} />, text: "About" },
+    { to: "/calculator", icon: <FaCalculator size={24} />, text: "Calculator" },
+    { to: "/chatbot", icon: <FaRobot size={24} />, text: "Chatbot" },
+    { to: "/education", icon: <FaGraduationCap size={24} />, text: "Finance Education" },
   ];
 
   return (
     <>
-      {/* Import Google Font */}
+      {/* Import Google Font (move to index.html for global scope in production) */}
       <link href="https://fonts.googleapis.com/css2?family=Economica:wght@700&display=swap" rel="stylesheet" />
       
       {/* Mobile overlay */}
@@ -70,11 +70,11 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
               SmartSpend
             </span>
             <img
-              src={user.photoURL}
+              src={user.photoURL || "default-avatar.png"} // Fallback for missing photoURL
               alt="profile"
               className="w-20 h-20 rounded-full"
             />
-            <span className="text-lg font-bold text-emerald-800">{user.displayName}</span>
+            <span className="text-lg font-bold text-emerald-800">{user.displayName || user.email || "User"}</span> {/* Fallback for displayName */}
           </div>
         </div>
 
