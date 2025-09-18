@@ -11,6 +11,7 @@ import About from "./pages/About";
 import Signup from "./pages/Signup";
 import Transaction from "./pages/Transaction";
 import BudgetPlanner from "./pages/BudgetPlanner";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -61,12 +62,7 @@ function App() {
                   element={<BudgetPlanner user={user} />} // Add BudgetPlanner route
                 />
                 {/* Add Dashboard route to fix the warning */}
-                <Route path="/dashboard" element={
-                  <div className="text-center py-12">
-                    <h1 className="text-4xl font-bold text-green-500 mb-4">Dashboard</h1>
-                    <p className="text-gray-400">Coming soon! This will show your financial overview.</p>
-                  </div>
-                } />
+                <Route path="/dashboard" element={<Dashboard user={user} /> } />
                 {/* Catch-all route for unmatched paths */}
                 <Route path="*" element={
                   <div className="text-center py-12">
