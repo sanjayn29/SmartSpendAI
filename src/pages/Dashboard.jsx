@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Component } from "react";
+import { db, doc, getDoc } from "../firebase";
 import { FaChartPie, FaWallet, FaArrowUp, FaArrowDown, FaCalculator, FaPiggyBank, FaChartLine, FaExclamationTriangle, FaEquals } from "react-icons/fa";
 
 // Error Boundary Component
@@ -40,26 +41,48 @@ function Dashboard({ user }) {
   const [error, setError] = useState(null);
   const [selectedMetric, setSelectedMetric] = useState("combined");
 
-  // Mock data for demonstration
+  // Fetch and aggregate data by year from Firestore
   useEffect(() => {
     const fetchData = async () => {
+      if (!user || !user.email) {
+        setError("User not authenticated or email not available");
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Generate mock data
-        const mockLabels = ['01 Jan', '05 Jan', '10 Jan', '15 Jan', '20 Jan', '25 Jan', '30 Jan'];
-        const mockIncomes = [5000, 3000, 7000, 4500, 6000, 8000, 5500];
-        const mockExpenses = [2000, 2500, 3000, 2800, 3500, 4000, 3200];
-        const mockBalances = mockLabels.map((_, i) => 
-          mockIncomes.slice(0, i + 1).reduce((a, b) => a + b, 0) - mockExpenses.slice(0, i + 1).reduce((a, b) => a + b, 0)
-        );
+        const userDocRef = doc(db, "transactions", user.email);
+        const docSnap = await getDoc(userDocRef);
 
-        setLabels(mockLabels);
-        setBalanceData(mockBalances);
-        setIncomeData(mockIncomes);
-        setExpenseData(mockExpenses);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const transactions = data.transactions || [];
+          const groupedData = transactions.reduce((acc, t) => {
+            const year = new Date(t.date).getFullYear().toString();
+            if (!acc[year]) acc[year] = { income: 0, expense: 0 };
+            if (t.type === "Income") acc[year].income += t.amount || 0;
+            if (t.type === "Expense") acc[year].expense += t.amount || 0;
+            return acc;
+          }, {});
+
+          const sortedLabels = Object.keys(groupedData).sort((a, b) => a - b);
+          const incomes = sortedLabels.map(year => groupedData[year].income);
+          const expenses = sortedLabels.map(year => groupedData[year].expense);
+          const balances = sortedLabels.map((_, i) => 
+            incomes.slice(0, i + 1).reduce((a, b) => a + b, 0) - expenses.slice(0, i + 1).reduce((a, b) => a + b, 0)
+          );
+
+          setLabels(sortedLabels);
+          setBalanceData(balances);
+          setIncomeData(incomes);
+          setExpenseData(expenses);
+        } else {
+          setLabels([]);
+          setBalanceData([]);
+          setIncomeData([]);
+          setExpenseData([]);
+        }
       } catch (err) {
         setError("Failed to load dashboard data: " + err.message);
       } finally {
@@ -84,107 +107,204 @@ function Dashboard({ user }) {
     const range = maxValue - minValue || 1;
 
     return (
-      <div className="relative h-48 bg-emerald-50 rounded-lg border border-emerald-200 p-4">
-        <svg className="w-full h-full" viewBox="0 0 400 160">
-          {/* Grid lines */}
-          {[0, 1, 2, 3, 4].map(i => (
-            <line key={i} x1="0" y1={32 * i} x2="400" y2={32 * i} stroke="#d1fae5" strokeWidth="1" />
-          ))}
-          
-          {/* Data lines */}
-          {selectedMetric === "combined" && (
-            <>
-              {/* Balance line */}
-              <polyline
-                points={balanceData.map((value, index) => 
-                  `${(index * 400) / (balanceData.length - 1)},${160 - ((value - minValue) / range) * 160}`
-                ).join(' ')}
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="3"
-                className="drop-shadow-sm"
+      <div className="space-y-6">
+        {/* Line Graph */}
+        <div className="relative h-72 bg-emerald-50 rounded-lg border border-emerald-200 p-4">
+          <svg className="w-full h-full" viewBox="0 0 400 240">
+            {/* Vertical lines (right to left) */}
+            {Array.from({ length: labels.length + 1 }, (_, i) => (
+              <line
+                key={`vertical-${i}`}
+                x1={(i * 400) / labels.length}
+                y1="0"
+                x2={(i * 400) / labels.length}
+                y2="240"
+                stroke="#e5e7eb"
+                strokeWidth="1"
+                strokeDasharray="2,2"
               />
-              {/* Income line */}
+            ))}
+            {/* Horizontal lines (top to bottom) */}
+            {Array.from({ length: 9 }, (_, i) => (
+              <line
+                key={`horizontal-${i}`}
+                x1="0"
+                y1={i * 30}
+                x2="400"
+                y2={i * 30}
+                stroke="#e5e7eb"
+                strokeWidth="1"
+                strokeDasharray="2,2"
+              />
+            ))}
+            
+            {/* Data lines */}
+            {selectedMetric === "combined" && (
+              <>
+                {/* Balance line */}
+                <polyline
+                  points={balanceData.map((value, index) => 
+                    `${(index * 400) / (balanceData.length - 1)},${240 - ((value - minValue) / range) * 240}`
+                  ).join(' ')}
+                  fill="none"
+                  stroke="#10b981"
+                  strokeWidth="3"
+                  className="drop-shadow-sm"
+                />
+                {/* Income line */}
+                <polyline
+                  points={incomeData.map((value, index) => 
+                    `${(index * 400) / (incomeData.length - 1)},${240 - ((value - minValue) / range) * 240}`
+                  ).join(' ')}
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="2"
+                  strokeDasharray="5,5"
+                />
+                {/* Expense line */}
+                <polyline
+                  points={expenseData.map((value, index) => 
+                    `${(index * 400) / (expenseData.length - 1)},${240 - ((value - minValue) / range) * 240}`
+                  ).join(' ')}
+                  fill="none"
+                  stroke="#ef4444"
+                  strokeWidth="2"
+                  strokeDasharray="5,5"
+                />
+              </>
+            )}
+            
+            {selectedMetric === "income" && (
               <polyline
                 points={incomeData.map((value, index) => 
-                  `${(index * 400) / (incomeData.length - 1)},${160 - ((value - minValue) / range) * 160}`
+                  `${(index * 400) / (incomeData.length - 1)},${240 - ((value - minValue) / range) * 240}`
                 ).join(' ')}
                 fill="none"
                 stroke="#3b82f6"
-                strokeWidth="2"
-                strokeDasharray="5,5"
+                strokeWidth="3"
+                className="drop-shadow-sm"
               />
-              {/* Expense line */}
+            )}
+            
+            {selectedMetric === "expense" && (
               <polyline
                 points={expenseData.map((value, index) => 
-                  `${(index * 400) / (expenseData.length - 1)},${160 - ((value - minValue) / range) * 160}`
+                  `${(index * 400) / (expenseData.length - 1)},${240 - ((value - minValue) / range) * 240}`
                 ).join(' ')}
                 fill="none"
                 stroke="#ef4444"
-                strokeWidth="2"
-                strokeDasharray="5,5"
+                strokeWidth="3"
+                className="drop-shadow-sm"
               />
-            </>
-          )}
+            )}
+            
+            {/* Data points */}
+            {(selectedMetric === "combined" ? balanceData : 
+              selectedMetric === "income" ? incomeData : expenseData).map((value, index) => (
+              <circle
+                key={index}
+                cx={(index * 400) / (balanceData.length - 1)}
+                cy={240 - ((value - minValue) / range) * 240}
+                r="4"
+                fill={selectedMetric === "combined" ? "#10b981" : 
+                      selectedMetric === "income" ? "#3b82f6" : "#ef4444"}
+                className="drop-shadow-sm"
+              />
+            ))}
+            
+            {/* X-axis labels (years) */}
+            {labels.map((label, index) => (
+              <text
+                key={index}
+                x={(index * 400) / (labels.length - 1)}
+                y="230"
+                textAnchor="middle"
+                fill="#6b7280"
+                fontSize="10"
+              >
+                {label}
+              </text>
+            ))}
+          </svg>
           
-          {selectedMetric === "income" && (
-            <polyline
-              points={incomeData.map((value, index) => 
-                `${(index * 400) / (incomeData.length - 1)},${160 - ((value - minValue) / range) * 160}`
-              ).join(' ')}
-              fill="none"
-              stroke="#3b82f6"
-              strokeWidth="3"
-              className="drop-shadow-sm"
-            />
-          )}
-          
-          {selectedMetric === "expense" && (
-            <polyline
-              points={expenseData.map((value, index) => 
-                `${(index * 400) / (expenseData.length - 1)},${160 - ((value - minValue) / range) * 160}`
-              ).join(' ')}
-              fill="none"
-              stroke="#ef4444"
-              strokeWidth="3"
-              className="drop-shadow-sm"
-            />
-          )}
-          
-          {/* Data points */}
-          {(selectedMetric === "combined" ? balanceData : 
-            selectedMetric === "income" ? incomeData : expenseData).map((value, index) => (
-            <circle
-              key={index}
-              cx={(index * 400) / (balanceData.length - 1)}
-              cy={160 - ((value - minValue) / range) * 160}
-              r="4"
-              fill={selectedMetric === "combined" ? "#10b981" : 
-                    selectedMetric === "income" ? "#3b82f6" : "#ef4444"}
-              className="drop-shadow-sm"
-            />
-          ))}
-        </svg>
-        
-        {/* Legend */}
-        <div className="absolute bottom-2 left-2 flex gap-4 text-xs">
-          {selectedMetric === "combined" && (
-            <>
+          {/* Legend */}
+          <div className="absolute bottom-2 left-2 flex gap-4 text-xs">
+            {selectedMetric === "combined" && (
+              <>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-0.5 bg-emerald-500"></div>
+                  <span className="text-emerald-700">Balance</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-0.5 bg-blue-500 border-dashed border-t"></div>
+                  <span className="text-blue-700">Income</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-0.5 bg-red-500 border-dashed border-t"></div>
+                  <span className="text-red-700">Expense</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Pie Chart */}
+        {totalIncome > 0 || totalExpense > 0 ? (
+          <div className="relative h-48 bg-emerald-50 rounded-lg border border-emerald-200 p-4">
+            <svg className="w-full h-full" viewBox="0 0 200 200">
+              <circle
+                cx="100"
+                cy="100"
+                r="80"
+                fill="none"
+                stroke="#e5e7eb"
+                strokeWidth="2"
+              />
+              {totalIncome > 0 && (
+                <path
+                  d={`
+                    M 100 100
+                    L ${100 + 80 * Math.cos(-0.5 * Math.PI)} ${100 + 80 * Math.sin(-0.5 * Math.PI)}
+                    A 80 80 0 ${totalIncome + totalExpense > 0 ? (totalIncome / (totalIncome + totalExpense) > 0.5 ? 1 : 0) : 0} 1
+                    ${100 + 80 * Math.cos(-0.5 * Math.PI + 2 * Math.PI * (totalIncome / (totalIncome + totalExpense)))}
+                    ${100 + 80 * Math.sin(-0.5 * Math.PI + 2 * Math.PI * (totalIncome / (totalIncome + totalExpense)))}
+                    Z
+                  `}
+                  fill="#3b82f6"
+                />
+              )}
+              {totalExpense > 0 && (
+                <path
+                  d={`
+                    M 100 100
+                    L ${100 + 80 * Math.cos(-0.5 * Math.PI + 2 * Math.PI * (totalIncome / (totalIncome + totalExpense)))}
+                    ${100 + 80 * Math.sin(-0.5 * Math.PI + 2 * Math.PI * (totalIncome / (totalIncome + totalExpense)))}
+                    A 80 80 0 ${totalExpense / (totalIncome + totalExpense) > 0.5 ? 1 : 0} 1
+                    ${100 + 80 * Math.cos(-0.5 * Math.PI + 2 * Math.PI)}
+                    ${100 + 80 * Math.sin(-0.5 * Math.PI + 2 * Math.PI)}
+                    Z
+                  `}
+                  fill="#ef4444"
+                />
+              )}
+              <text x="100" y="110" textAnchor="middle" fill="#6b7280" fontSize="12" fontWeight="bold">
+                Total: ₹{(totalIncome + totalExpense).toLocaleString("en-IN")}
+              </text>
+            </svg>
+            <div className="absolute bottom-2 left-2 flex gap-4 text-xs">
               <div className="flex items-center gap-1">
-                <div className="w-3 h-0.5 bg-emerald-500"></div>
-                <span className="text-emerald-700">Balance</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-0.5 bg-blue-500 border-dashed border-t"></div>
+                <div className="w-3 h-0.5 bg-blue-500"></div>
                 <span className="text-blue-700">Income</span>
               </div>
               <div className="flex items-center gap-1">
-                <div className="w-3 h-0.5 bg-red-500 border-dashed border-t"></div>
+                <div className="w-3 h-0.5 bg-red-500"></div>
                 <span className="text-red-700">Expense</span>
               </div>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6 text-emerald-600">No data available for pie chart</div>
+        )}
       </div>
     );
   };
@@ -288,7 +408,7 @@ function Dashboard({ user }) {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-bold text-emerald-800 flex items-center">
                 <FaCalculator className="mr-2 text-amber-600" />
-                Financial Trends
+                Financial Trends (Yearly)
               </h3>
               
               {/* Chart Toggle Buttons */}
