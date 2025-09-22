@@ -80,7 +80,7 @@ function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center text-emerald-100 mb-4 md:mb-0">
             <FaRegCopyright className="mr-1" />
-            <span>{currentYear} SmartSpendAI. All rights reserved.</span>
+            <span>{currentYear} SmartSpendAI. All rights reserved</span>
           </div>
           <div className="flex space-x-6 text-sm">
             <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">Privacy Policy</a>
