@@ -6,6 +6,8 @@ import Home from "./pages/Home";
 import Chatbot from "./pages/Chatbot";
 import Education from "./pages/Education";
 import Calculator from "./pages/Calculator";
+import Inflation from "./pages/Inflation";
+import Money from "./pages/Money";
 import Navbar from "./components/Navbar";
 import About from "./pages/About";
 import Signup from "./pages/Signup";
@@ -13,7 +15,6 @@ import Transaction from "./pages/Transaction";
 import BudgetPlanner from "./pages/BudgetPlanner";
 import Dashboard from "./pages/Dashboard";
 import Footer from "./components/Footer";
-import Inflation from "./pages/Inflation"; // New import
 
 function App() {
   const [user, setUser] = useState(null);
@@ -37,12 +38,20 @@ function App() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-black flex items-center justify-center text-white">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 border-t-amber-500 mx-auto mb-4"></div>
+          <p>Loading SmartSpendAI...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <Router>
       <div className="min-h-screen bg-black text-white flex flex-col">
+        {/* Main layout: Navbar (sidebar) and content */}
         <div className="flex flex-1 w-full">
           {user && <Navbar user={user} handleSignOut={handleSignOut} setUser={setUser} />}
           <div
@@ -60,19 +69,25 @@ function App() {
                   <Route path="/chatbot" element={<Chatbot user={user} />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/calculator" element={<Calculator />} />
+                  <Route path="/inflation" element={<Inflation />} />
+                  <Route path="/money" element={<Money />} />
                   <Route path="/transactions" element={<Transaction user={user} />} />
                   <Route path="/budget" element={<BudgetPlanner user={user} />} />
                   <Route path="/dashboard" element={<Dashboard user={user} />} />
-                  <Route path="/inflation" element={<Inflation />} /> {/* New route */}
                   <Route
                     path="*"
                     element={
-                      <div className="text-center py-12">
-                        <h1 className="text-2xl font-bold text-red-500 mb-4">404 - Page Not Found</h1>
-                        <p className="text-gray-400">The page you're looking for doesn't exist.</p>
-                        <a href="/" className="text-green-500 hover:underline mt-4 inline-block">
-                          Go to Home
-                        </a>
+                      <div className="min-h-screen flex items-center justify-center">
+                        <div className="text-center py-12 bg-white rounded-2xl shadow-xl p-8 mx-4 max-w-md w-full">
+                          <h1 className="text-3xl font-bold text-red-500 mb-4">404 - Page Not Found</h1>
+                          <p className="text-gray-600 mb-6">The page you're looking for doesn't exist.</p>
+                          <a 
+                            href="/" 
+                            className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-2 px-6 rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 inline-block"
+                          >
+                            Go to Home
+                          </a>
+                        </div>
                       </div>
                     }
                   />
