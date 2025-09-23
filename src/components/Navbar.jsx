@@ -10,6 +10,7 @@ import {
   FaRobot,
   FaGraduationCap,
   FaSignOutAlt,
+  FaPercentage, // New icon for Inflation
 } from "react-icons/fa";
 import { auth } from "../firebase";
 
@@ -19,7 +20,6 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeHover, setActiveHover] = useState(null);
 
-  // Auto-collapse on mobile when navigating
   useEffect(() => {
     if (window.innerWidth < 768) {
       setIsExpanded(false);
@@ -35,14 +35,13 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
     { to: "/calculator", icon: <FaCalculator size={24} />, text: "Calculator" },
     { to: "/chatbot", icon: <FaRobot size={24} />, text: "Chatbot" },
     { to: "/education", icon: <FaGraduationCap size={24} />, text: "Finance Education" },
+    { to: "/inflation", icon: <FaPercentage size={24} />, text: "Inflation" }, // New item
   ];
 
   return (
     <>
-      {/* Import Google Font (move to index.html for global scope in production) */}
       <link href="https://fonts.googleapis.com/css2?family=Economica:wght@700&display=swap" rel="stylesheet" />
 
-      {/* Mobile overlay */}
       {isExpanded && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
@@ -50,7 +49,6 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
         />
       )}
 
-      {/* Toggle button */}
       <button
         className={`fixed z-50 md:hidden top-4 left-4 p-2 rounded-lg bg-emerald-700 text-amber-300 shadow-lg transition-all duration-300 ${
           isExpanded ? "opacity-0" : "opacity-100"
@@ -73,7 +71,6 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
           isExpanded ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        {/* User Info */}
         <div className="w-full py-6 flex items-center justify-center border-b border-emerald-300">
           <div className="flex flex-col items-center gap-2">
             <span className="text-4xl font-bold text-emerald-800" style={{ fontFamily: "Economica, sans-serif" }}>
@@ -90,7 +87,6 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
           </div>
         </div>
 
-        {/* Navigation Items */}
         <div className="flex flex-col space-y-2 w-full px-4 overflow-hidden">
           {navItems.map((item, index) => (
             <Link
@@ -107,7 +103,6 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
                 if (window.innerWidth < 768) setIsExpanded(false);
               }}
             >
-              {/* Animated highlight bar */}
               <div
                 className={`absolute left-0 w-1 h-8 rounded-r-full transition-all duration-300 ${
                   location.pathname === item.to
@@ -117,8 +112,6 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
                     : "bg-transparent"
                 }`}
               />
-
-              {/* Icon with gold color */}
               <div
                 className={`transition-all duration-300 ${
                   location.pathname === item.to
@@ -128,7 +121,6 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
               >
                 {item.icon}
               </div>
-
               <span
                 className={`text-sm font-medium transition-all duration-300 ${
                   location.pathname === item.to ? "font-bold" : ""
@@ -136,8 +128,6 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
               >
                 {item.text}
               </span>
-
-              {/* Hover effect - shimmering gold line */}
               <div
                 className={`absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-amber-300/20 to-transparent opacity-0 transition-opacity duration-500 ${
                   activeHover === index ? "opacity-100" : ""
@@ -147,7 +137,6 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
           ))}
         </div>
 
-        {/* Logout Button */}
         <div className="w-full pt-6 pb-4 px-4 border-t border-emerald-300">
           <button
             onClick={() => {

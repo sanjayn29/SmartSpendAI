@@ -13,6 +13,7 @@ import Transaction from "./pages/Transaction";
 import BudgetPlanner from "./pages/BudgetPlanner";
 import Dashboard from "./pages/Dashboard";
 import Footer from "./components/Footer";
+import Inflation from "./pages/Inflation"; // New import
 
 function App() {
   const [user, setUser] = useState(null);
@@ -42,7 +43,6 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-black text-white flex flex-col">
-        {/* Main layout: Navbar (sidebar) and content */}
         <div className="flex flex-1 w-full">
           {user && <Navbar user={user} handleSignOut={handleSignOut} setUser={setUser} />}
           <div
@@ -63,6 +63,7 @@ function App() {
                   <Route path="/transactions" element={<Transaction user={user} />} />
                   <Route path="/budget" element={<BudgetPlanner user={user} />} />
                   <Route path="/dashboard" element={<Dashboard user={user} />} />
+                  <Route path="/inflation" element={<Inflation />} /> {/* New route */}
                   <Route
                     path="*"
                     element={
