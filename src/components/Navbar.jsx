@@ -108,8 +108,15 @@ const Navbar = ({ user, setUser, handleSignOut }) => {
           </div>
         </div>
 
-        {/* Navigation Items */}
-        <div className="flex-1 flex flex-col space-y-1 w-full px-3 py-4 overflow-y-auto">
+        {/* Navigation Items - Scrollbar Removed */}
+        <div className="flex-1 flex flex-col space-y-1 w-full px-3 py-4 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none]">
+          <style>
+            {`
+              .overflow-y-auto::-webkit-scrollbar {
+                display: none;
+              }
+            `}
+          </style>
           {navItems.map((item, index) => (
             <Link
               key={item.to}
