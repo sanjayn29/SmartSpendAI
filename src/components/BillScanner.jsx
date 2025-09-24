@@ -29,40 +29,112 @@ const BillScanner = ({ user, onClose, onSuccess }) => {
   const webcamRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Extract amount from text using regex patterns
+  // Enhanced amount extraction with better bill analysis
   const extractAmountFromText = (text) => {
-    // Common patterns for amounts in bills
-    const patterns = [
-      // ₹123.45, Rs 123.45, Rs. 123.45
-      /(?:₹|Rs\.?|INR)\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/gi,
-      // Total: 123.45, Amount: 123.45
-      /(?:total|amount|sum|bill|pay|due)[\s:]*₹?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/gi,
-      // 123.45 (standalone numbers that look like amounts)
-      /\b(\d{1,3}(?:,\d{3})*\.\d{2})\b/g,
-      // Large numbers without decimals
-      /\b(\d{3,})\b/g
+    console.log("Extracted text:", text); // Debug log
+    
+    // Clean and normalize the text
+    const cleanText = text
+      .replace(/[|]/g, 'I') // Fix common OCR errors
+      .replace(/[O]/g, '0') // Replace O with 0 in numbers
+      .replace(/[l]/g, '1') // Replace l with 1 in numbers
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .toUpperCase();
+
+    console.log("Cleaned text:", cleanText); // Debug log
+
+    // Priority-based amount extraction
+    const amountCandidates = [];
+
+    // 1. Look for explicit total/amount labels (highest priority)
+    const totalPatterns = [
+      /(?:TOTAL|AMOUNT|GRAND\s*TOTAL|NET\s*AMOUNT|BILL\s*AMOUNT|PAYABLE|DUE|BALANCE)[\s:]*(?:RS\.?|₹)?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)/gi,
+      /(?:RS\.?|₹)\s*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)\s*(?:TOTAL|AMOUNT|PAYABLE|DUE)/gi,
+      /TOTAL[\s:]*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)/gi
     ];
 
-    const amounts = [];
-    
-    patterns.forEach(pattern => {
-      const matches = text.match(pattern);
-      if (matches) {
-        matches.forEach(match => {
-          // Extract just the number part
-          const numberMatch = match.match(/(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/);
-          if (numberMatch) {
-            const amount = parseFloat(numberMatch[1].replace(/,/g, ''));
-            if (amount > 0 && amount < 1000000) { // Reasonable range for bill amounts
-              amounts.push(amount);
-            }
-          }
-        });
-      }
+    totalPatterns.forEach((pattern, index) => {
+      const matches = [...cleanText.matchAll(pattern)];
+      matches.forEach(match => {
+        const amount = parseFloat(match[1].replace(/,/g, ''));
+        if (amount > 0 && amount < 1000000) {
+          amountCandidates.push({
+            amount,
+            priority: 10 - index, // Higher priority for earlier patterns
+            context: match[0],
+            type: 'total'
+          });
+        }
+      });
     });
 
-    // Return the largest amount found (likely to be the total)
-    return amounts.length > 0 ? Math.max(...amounts) : null;
+    // 2. Look for currency symbols with amounts (medium priority)
+    const currencyPatterns = [
+      /(?:RS\.?|₹)\s*(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)/gi,
+      /(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)\s*(?:RS\.?|₹)/gi
+    ];
+
+    currencyPatterns.forEach((pattern, index) => {
+      const matches = [...cleanText.matchAll(pattern)];
+      matches.forEach(match => {
+        const amount = parseFloat(match[1].replace(/,/g, ''));
+        if (amount > 10 && amount < 1000000) { // Minimum ₹10 for currency patterns
+          amountCandidates.push({
+            amount,
+            priority: 7 - index,
+            context: match[0],
+            type: 'currency'
+          });
+        }
+      });
+    });
+
+    // 3. Look for structured amounts (lower priority)
+    const structuredPatterns = [
+      /(\d{1,3}(?:,\d{3})+\.\d{2})/g, // 1,234.56 format
+      /(\d{3,})\.\d{2}/g, // 1234.56 format
+      /(\d{3,})/g // Large numbers without decimals
+    ];
+
+    structuredPatterns.forEach((pattern, index) => {
+      const matches = [...cleanText.matchAll(pattern)];
+      matches.forEach(match => {
+        const amount = parseFloat(match[1].replace(/,/g, ''));
+        if (amount > 50 && amount < 1000000) { // Minimum ₹50 for structured patterns
+          amountCandidates.push({
+            amount,
+            priority: 4 - index,
+            context: match[0],
+            type: 'structured'
+          });
+        }
+      });
+    });
+
+    console.log("Amount candidates:", amountCandidates); // Debug log
+
+    if (amountCandidates.length === 0) {
+      return null;
+    }
+
+    // Sort by priority (highest first), then by amount (largest first)
+    amountCandidates.sort((a, b) => {
+      if (a.priority !== b.priority) {
+        return b.priority - a.priority;
+      }
+      return b.amount - a.amount;
+    });
+
+    // Additional validation: prefer amounts that appear in bill-like contexts
+    const billKeywords = ['TOTAL', 'AMOUNT', 'PAYABLE', 'DUE', 'BILL', 'INVOICE'];
+    const contextualCandidate = amountCandidates.find(candidate => 
+      billKeywords.some(keyword => candidate.context.includes(keyword))
+    );
+
+    const selectedAmount = contextualCandidate || amountCandidates[0];
+    console.log("Selected amount:", selectedAmount); // Debug log
+
+    return selectedAmount.amount;
   };
 
   // Capture image from webcam
@@ -94,6 +166,7 @@ const BillScanner = ({ user, onClose, onSuccess }) => {
     setOcrProgress(0);
 
     try {
+      // Enhanced OCR configuration for better bill recognition
       const { data: { text } } = await Tesseract.recognize(
         imageSrc,
         'eng',
@@ -102,21 +175,27 @@ const BillScanner = ({ user, onClose, onSuccess }) => {
             if (m.status === 'recognizing text') {
               setOcrProgress(Math.round(m.progress * 100));
             }
-          }
+          },
+          tessedit_pageseg_mode: Tesseract.PSM.SPARSE_TEXT,
+          tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,:-₹Rs ',
+          preserve_interword_spaces: '1'
         }
       );
 
+      console.log("Raw OCR text:", text); // Debug log
       setExtractedText(text);
+      
       const amount = extractAmountFromText(text);
       
       if (amount) {
         setExtractedAmount(amount.toString());
         setEditableAmount(amount.toString());
       } else {
-        setError('Could not extract amount from the bill. Please enter manually.');
+        setError('Could not extract amount from the bill. Please check the image quality and try again, or enter the amount manually.');
         setEditableAmount('');
       }
     } catch (err) {
+      console.error("OCR Error:", err);
       setError('Failed to process image: ' + err.message);
     } finally {
       setIsProcessing(false);
