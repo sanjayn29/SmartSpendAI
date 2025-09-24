@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaMicrophone, FaTimes, FaPaperPlane, FaRobot, FaLightbulb, FaChartLine, FaPiggyBank } from "react-icons/fa";
+import { FaMicrophone, FaTimes, FaPaperPlane, FaRobot, FaLightbulb, FaChartLine, FaPiggyBank, FaVolumeUp, FaCheckCircle } from "react-icons/fa";
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth, db, doc, updateDoc, arrayUnion, getDoc } from '../firebase';
 
 function Chatbot() {
+  const [user] = useAuthState(auth);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isListening, setIsListening] = useState(false);
@@ -98,8 +101,137 @@ function Chatbot() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const addMessage = (text, sender) => {
-    setMessages((prev) => [...prev, { text, sender, timestamp: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }) }]);
+  const addMessage = (text, sender, hasTransaction = false, transactionData = null) => {
+    setMessages((prev) => [...prev, { 
+      text, 
+      sender, 
+      timestamp: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }),
+      hasTransaction,
+      transactionData
+    }]);
+  };
+
+  // Text-to-Speech function
+  const speakText = (text) => {
+    if ('speechSynthesis' in window) {
+      // Cancel any ongoing speech
+      window.speechSynthesis.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      utterance.volume = 0.8;
+      
+      // Try to use a female voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const femaleVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes('female') || 
+        voice.name.toLowerCase().includes('zira') ||
+        voice.name.toLowerCase().includes('hazel')
+      );
+      
+      if (femaleVoice) {
+        utterance.voice = femaleVoice;
+      }
+      
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  // Extract transaction intent from message
+  const extractTransactionIntent = (message) => {
+    const messageLower = message.toLowerCase();
+    
+    // Income patterns
+    const incomePatterns = [
+      /add (?:income|money|cash|salary|earning|credit)\s*(?:of\s*)?(?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)/i,
+      /(?:income|earned|received|got|salary|credit)\s*(?:of\s*)?(?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)/i,
+      /add (?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)\s*(?:income|earning|salary|credit)/i,
+      /credit (?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)/i,
+      /deposit (?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)/i
+    ];
+    
+    // Expense patterns
+    const expensePatterns = [
+      /add (?:expense|spent|spend|cost|paid|bill|debit)\s*(?:of\s*)?(?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)/i,
+      /(?:spent|spend|paid|cost|expense|bill|debit)\s*(?:of\s*)?(?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)/i,
+      /add (?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)\s*(?:expense|spent|cost|bill)/i,
+      /debit (?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)/i,
+      /withdraw (?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)/i,
+      /i spent (?:rs\.?\s*|₹\s*)?(\d+(?:\.\d{2})?)/i
+    ];
+    
+    // Check income patterns
+    for (const pattern of incomePatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        return {
+          type: 'income',
+          amount: parseFloat(match[1]),
+          description: 'Income added via chatbot'
+        };
+      }
+    }
+    
+    // Check expense patterns
+    for (const pattern of expensePatterns) {
+      const match = message.match(pattern);
+      if (match) {
+        return {
+          type: 'expense',
+          amount: parseFloat(match[1]),
+          description: 'Expense added via chatbot'
+        };
+      }
+    }
+    
+    return null;
+  };
+
+  // Add transaction to Firebase
+  const addTransactionToFirebase = async (transactionData) => {
+    try {
+      if (!user || !user.email) {
+        throw new Error('User not authenticated');
+      }
+
+      const userDocRef = doc(db, "transactions", user.email);
+      const docSnap = await getDoc(userDocRef);
+      
+      const currentData = docSnap.exists() ? docSnap.data() : { totalAmount: 0, transactions: [] };
+      
+      const transaction = {
+        type: transactionData.type === 'income' ? 'Income' : 'Expense',
+        amount: transactionData.amount,
+        date: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        source: 'Chatbot',
+        description: transactionData.description
+      };
+      
+      // Update total amount
+      const newTotal = transactionData.type === 'income' 
+        ? currentData.totalAmount + transactionData.amount
+        : currentData.totalAmount - transactionData.amount;
+      
+      // Update document
+      await updateDoc(userDocRef, {
+        totalAmount: newTotal,
+        transactions: arrayUnion(transaction)
+      });
+      
+      return {
+        success: true,
+        transaction,
+        newBalance: newTotal
+      };
+    } catch (error) {
+      console.error('Firebase transaction error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
   };
 
   const handleSendMessage = async (message, isVoice = false) => {
@@ -108,22 +240,90 @@ function Chatbot() {
     addMessage(message, "user");
     setInput("");
 
+    // Check for transaction intent first
+    const transactionIntent = extractTransactionIntent(message);
+    
+    if (transactionIntent && user?.email) {
+      // Handle transaction locally
+      const result = await addTransactionToFirebase(transactionIntent);
+      
+      if (result.success) {
+        const transactionType = transactionIntent.type === 'income' ? 'income' : 'expense';
+        const reply = `✅ Successfully added ${transactionType} of ₹${transactionIntent.amount.toLocaleString('en-IN')}! Your new balance is ₹${result.newBalance.toLocaleString('en-IN')}.`;
+        
+        addMessage(reply, "bot", true, result.transaction);
+        
+        if (isVoice) {
+          speakText(reply);
+        }
+        return;
+      } else {
+        const errorReply = `❌ Sorry, I couldn't add the transaction. Error: ${result.error}`;
+        addMessage(errorReply, "bot");
+        if (isVoice) {
+          speakText(errorReply);
+        }
+        return;
+      }
+    } else if (transactionIntent && !user?.email) {
+      const loginReply = "I can help you add transactions, but I need you to be logged in first. Please sign in to your account.";
+      addMessage(loginReply, "bot");
+      if (isVoice) {
+        speakText(loginReply);
+      }
+      return;
+    }
+
+    // If no transaction intent, proceed with regular chat
     try {
+      const requestBody = {
+        message,
+        userEmail: user?.email || null,
+        history: messages.map(m => ({ 
+          role: m.sender === "user" ? "user" : "assistant", 
+          content: m.text 
+        }))
+      };
+
       const res = await fetch("http://localhost:5000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, history: messages.map(m => ({ role: m.sender === "user" ? "user" : "assistant", content: m.text })) }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!res.ok) {
         throw new Error("Network response was not ok");
       }
+      
       const data = await res.json();
       const reply = data.reply || "Sorry, I couldn't generate a response.";
+      
       addMessage(reply, "bot");
+      
+      // Speak the response if it was a voice input
+      if (isVoice) {
+        speakText(reply);
+      }
+      
     } catch (err) {
       console.error("Chat error:", err);
-      addMessage("There was a problem contacting the assistant. Please try again.", "bot");
+      
+      // Provide helpful fallback responses when backend is not available
+      const fallbackResponses = [
+        "I'm here to help you with your finances! You can add transactions by saying things like 'Add income 5000' or 'I spent 200 on groceries'.",
+        "I can help you manage your money! Try commands like 'Add expense 150' or 'Credit 3000' to track your transactions.",
+        "Welcome to SmartSpendAI! I can help you track expenses and income. Just tell me about your transactions!",
+        "I'm your financial assistant! You can add transactions by saying 'Add income [amount]' or 'I spent [amount]'. I can also provide financial advice!",
+        "Hi there! I can help you track your spending and income. Try saying 'Add expense 100' or 'I earned 5000' to get started!",
+        "I'm here to help with your financial management! You can tell me about your transactions and I'll save them for you."
+      ];
+      
+      const randomResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+      addMessage(randomResponse, "bot");
+      
+      if (isVoice) {
+        speakText(randomResponse);
+      }
     }
   };
 
@@ -221,11 +421,15 @@ function Chatbot() {
                 <p className="mb-4">I'm here to help you manage your finances smarter.</p>
                 <div className="bg-emerald-100 p-3 rounded-lg text-sm">
                   <p className="font-medium mb-1">Try asking me:</p>
-                  <ul className="text-left list-disc list-inside">
+                  <ul className="text-left list-disc list-inside space-y-1">
+                    <li>"Add income 5000" or "Add expense 200"</li>
+                    <li>"I spent 150 on groceries"</li>
                     <li>"How can I save more money?"</li>
                     <li>"Create a budget for me"</li>
-                    <li>"Analyze my spending habits"</li>
                   </ul>
+                  <div className="mt-2 p-2 bg-amber-50 rounded border border-amber-200">
+                    <p className="text-xs text-amber-700 font-medium">💡 Voice commands work too!</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -236,15 +440,43 @@ function Chatbot() {
                 className={`mb-4 flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-xs lg:max-w-md p-4 rounded-2xl shadow-sm animate-fade-in ${
+                  className={`max-w-xs lg:max-w-md p-4 rounded-2xl shadow-sm animate-fade-in relative ${
                     message.sender === "user"
                       ? "bg-emerald-700 text-white rounded-br-none"
+                      : message.hasTransaction
+                      ? "bg-gradient-to-r from-green-100 to-emerald-100 text-emerald-800 rounded-bl-none border-2 border-green-300"
                       : "bg-emerald-100 text-emerald-800 rounded-bl-none"
                   }`}
                 >
+                  {/* Transaction indicator */}
+                  {message.hasTransaction && (
+                    <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-1">
+                      <FaCheckCircle className="w-3 h-3" />
+                    </div>
+                  )}
+                  
                   <div className="text-sm">{message.text}</div>
-                  <div className={`text-xs mt-1 ${message.sender === "user" ? "text-emerald-200" : "text-emerald-600"}`}>
-                    {message.timestamp}
+                  
+                  {/* Transaction details */}
+                  {message.hasTransaction && message.transactionData && (
+                    <div className="mt-2 p-2 bg-white rounded-lg border border-green-200">
+                      <div className="text-xs text-green-700 font-medium">
+                        Transaction Added: {message.transactionData.type} of ₹{message.transactionData.amount}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className={`flex items-center justify-between mt-1 ${message.sender === "user" ? "text-emerald-200" : "text-emerald-600"}`}>
+                    <span className="text-xs">{message.timestamp}</span>
+                    {message.sender === "bot" && (
+                      <button
+                        onClick={() => speakText(message.text)}
+                        className="ml-2 p-1 rounded hover:bg-emerald-200 transition-colors"
+                        title="Listen to message"
+                      >
+                        <FaVolumeUp className="w-3 h-3" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
