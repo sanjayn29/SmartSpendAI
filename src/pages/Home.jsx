@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { db, doc, getDoc } from "../firebase";
+import BillScanner from "../components/BillScanner";
 import { 
   FaWallet, 
   FaChartPie, 
@@ -21,7 +22,9 @@ import {
   FaMoneyCheckAlt,
   FaChartBar,
   FaCog,
-  FaSync
+  FaSync,
+  FaQrcode,
+  FaCamera
 } from "react-icons/fa";
 
 function Home({ user }) {
@@ -53,6 +56,7 @@ function Home({ user }) {
   ]);
   const [currentQuote, setCurrentQuote] = useState(0);
   const [upcomingBills, setUpcomingBills] = useState([]);
+  const [showBillScanner, setShowBillScanner] = useState(false);
 
   // Fetch user data from Firebase
   const fetchData = async () => {
@@ -235,6 +239,16 @@ function Home({ user }) {
     fetchData();
   };
 
+  // Handle successful bill scan
+  const handleBillScanSuccess = (transaction) => {
+    // Update local state with new transaction
+    setTransactions(prev => [transaction, ...prev].sort((a, b) => new Date(b.date) - new Date(a.date)));
+    setTotalAmount(prev => prev - transaction.amount); // Subtract expense from total
+    
+    // Refresh data to ensure consistency
+    fetchData();
+  };
+
   // Calculate financial metrics
   const totalIncome = transactions
     .filter(t => t.type === "Income")
@@ -404,6 +418,30 @@ function Home({ user }) {
             <p className="text-emerald-600 text-sm">
               {savingsRate > 20 ? "Excellent savings!" : savingsRate > 10 ? "Good job!" : "Keep working on it!"}
             </p>
+          </div>
+        </div>
+
+        {/* Bill Scanner Feature */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-r from-orange-100 to-orange-200 border border-orange-300 rounded-2xl p-6 shadow-lg">
+            <div className="flex flex-col md:flex-row items-center justify-between">
+              <div className="flex items-center mb-4 md:mb-0">
+                <div className="bg-orange-500 rounded-full p-4 mr-4 shadow-lg">
+                  <FaQrcode className="text-white text-2xl" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-orange-800 mb-1">Scan Your Bills</h3>
+                  <p className="text-orange-700">Use AI to extract amounts from your bills automatically</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowBillScanner(true)}
+                className="flex items-center gap-3 bg-orange-600 hover:bg-orange-700 text-white font-semibold px-6 py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg"
+              >
+                <FaCamera className="text-xl" />
+                <span>Scan Bill</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -630,6 +668,15 @@ function Home({ user }) {
           </div>
         </div>
       </div>
+
+      {/* Bill Scanner Modal */}
+      {showBillScanner && (
+        <BillScanner
+          user={user}
+          onClose={() => setShowBillScanner(false)}
+          onSuccess={handleBillScanSuccess}
+        />
+      )}
     </div>
   );
 }
