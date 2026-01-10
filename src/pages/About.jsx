@@ -108,38 +108,7 @@ function About() {
             </div>
           </div>
 
-          {/* Contributors Card */}
-          <div className="bg-white rounded-2xl shadow-lg border border-emerald-200 p-6">
-            <div className="flex items-center mb-4">
-              <div className="bg-emerald-100 p-3 rounded-full mr-3">
-                <FaUsers className="text-amber-600 text-xl" />
-              </div>
-              <h3 className="text-lg font-semibold text-emerald-800">Contributors</h3>
-            </div>
-            <p className="text-emerald-700 text-sm mb-3">
-              SmartSpendAI is developed by a passionate team dedicated to financial empowerment.
-            </p>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <div className="bg-emerald-100 w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-emerald-700 font-bold">S</span>
-                </div>
-                <div>
-                  <h4 className="font-medium text-emerald-800">Sanja</h4>
-                  <p className="text-emerald-600 text-xs">Lead Developer</p>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <div className="bg-amber-100 w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                  <span className="text-amber-700 font-bold">AI</span>
-                </div>
-                <div>
-                  <h4 className="font-medium text-emerald-800">AI Assistant (xAI)</h4>
-                  <p className="text-emerald-600 text-xs">Code Optimization</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          
 
           {/* Gallery Card */}
           <div className="bg-white rounded-2xl shadow-lg border border-emerald-200 p-6">
