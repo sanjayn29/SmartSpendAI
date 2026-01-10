@@ -32,7 +32,7 @@ function Signup({ setUser }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-green-100 flex flex-col items-center justify-center p-4">
+    <div className="h-screen w-screen bg-gradient-to-br from-emerald-50 to-green-100 flex flex-col items-center justify-center p-4 overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-10 left-10 opacity-20">
         <FaCoins className="text-amber-400 text-6xl" />
@@ -90,11 +90,11 @@ function Signup({ setUser }) {
         </p>
       </div>  
 
-      {/* Animated circles in background */}
-      <div className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-amber-200 opacity-30 animate-pulse"></div>
-      <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-emerald-200 opacity-30 animate-pulse delay-1000"></div>
+      {/* Animated circles in background - positioned inside to avoid overflow */}
+      <div className="absolute bottom-5 left-5 w-32 h-32 rounded-full bg-amber-200 opacity-30 animate-pulse"></div>
+      <div className="absolute top-5 right-5 w-32 h-32 rounded-full bg-emerald-200 opacity-30 animate-pulse delay-1000"></div>
     </div>
   );
 }
 
-export default Signup;
+export default Signup;     
