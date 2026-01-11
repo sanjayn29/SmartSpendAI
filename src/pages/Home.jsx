@@ -649,24 +649,7 @@ function Home({ user }) {
           </Link>
         </div>
 
-        {/* Help Section */}
-        <div className="bg-gradient-to-r from-emerald-100 to-emerald-200 border border-emerald-300 rounded-2xl p-6 text-center">
-          <div className="flex items-center justify-center mb-4">
-            <FaQuestionCircle className="text-amber-600 text-2xl mr-3" />
-            <h3 className="text-xl font-bold text-emerald-800">Need Help Getting Started?</h3>
-          </div>
-          <p className="text-emerald-700 mb-4">
-            Check out our guide on how to make the most of SmartSpendAI
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button className="bg-emerald-700 hover:bg-emerald-800 text-white py-2 px-4 rounded-xl transition-all">
-              View Tutorial
-            </button>
-            <button className="bg-white hover:bg-emerald-100 text-emerald-700 border border-emerald-300 py-2 px-4 rounded-xl transition-all">
-              Contact Support
-            </button>
-          </div>
-        </div>
+        
       </div>
 
       {/* Bill Scanner Modal */}
