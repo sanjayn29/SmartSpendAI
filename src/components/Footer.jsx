@@ -1,10 +1,9 @@
 import React from "react";
 import { 
-  FaFacebook, 
-  FaTwitter, 
   FaInstagram, 
   FaLinkedin, 
   FaGithub,
+  FaCode,
   FaHeart,
   FaRegCopyright
 } from "react-icons/fa";
@@ -30,15 +29,17 @@ function Footer() {
               We help you track, plan, and optimize your finances with AI-powered insights.
             </p>
             <div className="flex space-x-4">
-              
-              <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">
+              <a href="https://www.instagram.com/_sanjay_n_/" className="text-emerald-100 hover:text-amber-400 transition-colors">
                 <FaInstagram size={20} />
               </a>
-              <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">
+              <a href="https://www.linkedin.com/in/sanjayn29" className="text-emerald-100 hover:text-amber-400 transition-colors">
                 <FaLinkedin size={20} />
               </a>
-              <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">
+              <a href="https://github.com/sanjayn29" className="text-emerald-100 hover:text-amber-400 transition-colors">
                 <FaGithub size={20} />
+              </a>
+              <a href="https://leetcode.com/sanjayn29" className="text-emerald-100 hover:text-amber-400 transition-colors">
+                <FaCode size={20} />
               </a>
             </div>
           </div>
@@ -75,7 +76,7 @@ function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center text-emerald-100 mb-4 md:mb-0">
             <FaRegCopyright className="mr-1" />
-            <span>{currentYear} SmartSpendAI. All rights reserved .</span>
+            <span>{currentYear} SmartSpendAI. All rights reserved.</span>
           </div>
           
         </div>
