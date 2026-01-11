@@ -1,5 +1,5 @@
 import React from "react";
-import { FaInfoCircle, FaChartLine, FaUsers, FaRoad, FaImages, FaQuoteLeft, FaArrowRight, FaCalculator, FaPiggyBank, FaMoneyBillWave } from "react-icons/fa";
+import { FaInfoCircle, FaChartLine, FaUsers, FaRoad, FaImages, FaQuoteLeft, FaArrowRight, FaCalculator, FaPiggyBank, FaMoneyBillWave, FaWallet, FaChartPie, FaClipboardList, FaPercentage, FaExchangeAlt, FaRobot, FaBookOpen } from "react-icons/fa";
 
 function About() {
   const currentDate = new Date().toLocaleString("en-IN", {
@@ -24,7 +24,7 @@ function About() {
             </div>
             <h1 className="text-3xl font-bold text-emerald-800 mb-2">About SmartSpendAI</h1>
             <p className="text-emerald-600 max-w-md">
-              Your intelligent financial companion for smarter money management
+              Your intelligent financial companion for smarter money management and planning
             </p>
           </div>
         </div>
@@ -40,30 +40,42 @@ function About() {
               <h3 className="text-lg font-semibold text-emerald-800">Overview</h3>
             </div>
             <p className="text-emerald-700 text-sm mb-3">
-              Welcome to <strong className="text-amber-600">SmartSpendAI</strong>, your all-in-one financial calculator designed to simplify money management.
+              Welcome to <strong className="text-amber-600">SmartSpendAI</strong>, your comprehensive financial management platform designed to simplify and optimize your money decisions.
             </p>
             <div className="bg-emerald-50 rounded-lg p-4">
               <h4 className="font-medium text-emerald-800 mb-2">Key Features:</h4>
               <ul className="space-y-2">
                 <li className="flex items-start">
                   <span className="text-amber-600 mr-2">•</span>
-                  <span className="text-emerald-700 text-sm"><strong>Basic Calculator:</strong> Arithmetic, scientific, and memory functions</span>
+                  <span className="text-emerald-700 text-sm"><strong>Transactions:</strong> Track income, expenses, and categorize spending effortlessly</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-amber-600 mr-2">•</span>
-                  <span className="text-emerald-700 text-sm"><strong>Simple Interest:</strong> Calculate interest with principal, rate, and time</span>
+                  <span className="text-emerald-700 text-sm"><strong>Dashboard:</strong> Real-time overview of your financial health with charts and insights</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-amber-600 mr-2">•</span>
-                  <span className="text-emerald-700 text-sm"><strong>Compound Interest:</strong> Compute compound interest for investments</span>
+                  <span className="text-emerald-700 text-sm"><strong>Budget Planner:</strong> Create, monitor, and adjust budgets to stay on track</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-amber-600 mr-2">•</span>
-                  <span className="text-emerald-700 text-sm"><strong>Loan EMI:</strong> Determine monthly loan payments</span>
+                  <span className="text-emerald-700 text-sm"><strong>Calculator:</strong> Arithmetic, scientific, simple/compound interest, loan EMI, and tip calculations</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-amber-600 mr-2">•</span>
-                  <span className="text-emerald-700 text-sm"><strong>Tip Calculator:</strong> Add tips to bills effortlessly</span>
+                  <span className="text-emerald-700 text-sm"><strong>Inflation Calculator:</strong> Adjust future values for inflation impact</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-amber-600 mr-2">•</span>
+                  <span className="text-emerald-700 text-sm"><strong>Currency Converter:</strong> Real-time conversion across global currencies</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-amber-600 mr-2">•</span>
+                  <span className="text-emerald-700 text-sm"><strong>AI Chatbot:</strong> Get personalized financial advice and answers instantly</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-amber-600 mr-2">•</span>
+                  <span className="text-emerald-700 text-sm"><strong>Finance Education:</strong> Learn key concepts through guides, tips, and resources</span>
                 </li>
               </ul>
             </div>
@@ -78,68 +90,43 @@ function About() {
               <h3 className="text-lg font-semibold text-emerald-800">Roadmap</h3>
             </div>
             <p className="text-emerald-700 text-sm mb-3">
-              We're committed to enhancing SmartSpendAI with new features:
+              We're committed to enhancing SmartSpendAI with innovative features:
             </p>
             <div className="space-y-3">
               <div className="flex items-start">
                 <div className="bg-amber-100 text-amber-700 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
                   <span className="text-xs font-bold">1</span>
                 </div>
-                <span className="text-emerald-700 text-sm">Integration with cloud storage for saved calculations</span>
+                <span className="text-emerald-700 text-sm">Integration with bank APIs for automatic transaction syncing</span>
               </div>
               <div className="flex items-start">
                 <div className="bg-amber-100 text-amber-700 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
                   <span className="text-xs font-bold">2</span>
                 </div>
-                <span className="text-emerald-700 text-sm">Advanced financial tools (tax calculator, savings planner)</span>
+                <span className="text-emerald-700 text-sm">Advanced analytics with predictive spending forecasts</span>
               </div>
               <div className="flex items-start">
                 <div className="bg-amber-100 text-amber-700 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
                   <span className="text-xs font-bold">3</span>
                 </div>
-                <span className="text-emerald-700 text-sm">Multi-currency support and real-time exchange rates</span>
+                <span className="text-emerald-700 text-sm">Goal-based savings trackers with milestone notifications</span>
               </div>
               <div className="flex items-start">
                 <div className="bg-amber-100 text-amber-700 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
                   <span className="text-xs font-bold">4</span>
                 </div>
-                <span className="text-emerald-700 text-sm">Mobile app release for iOS and Android</span>
+                
+                <span className="text-emerald-700 text-sm">Mobile app release for iOS and Android with offline support</span>
               </div>
+              <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+              <p className="text-emerald-700 text-sm italic mb-2">
+                "Tracking transactions has never been easier, and the education section is full of valuable insights."
+              </p>
+            </div>
+              
             </div>
           </div>
 
-          
-
-          {/* Gallery Card */}
-          <div className="bg-white rounded-2xl shadow-lg border border-emerald-200 p-6">
-            <div className="flex items-center mb-4">
-              <div className="bg-emerald-100 p-3 rounded-full mr-3">
-                <FaImages className="text-amber-600 text-xl" />
-              </div>
-              <h3 className="text-lg font-semibold text-emerald-800">Gallery</h3>
-            </div>
-            <p className="text-emerald-700 text-sm mb-3">
-              Explore visuals of SmartSpendAI in action:
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-emerald-50 h-20 rounded-lg flex flex-col items-center justify-center text-amber-600 border border-emerald-200">
-                <FaCalculator className="mb-1" />
-                <span className="text-xs text-emerald-700">Calculator</span>
-              </div>
-              <div className="bg-emerald-50 h-20 rounded-lg flex flex-col items-center justify-center text-amber-600 border border-emerald-200">
-                <FaPiggyBank className="mb-1" />
-                <span className="text-xs text-emerald-700">Savings</span>
-              </div>
-              <div className="bg-emerald-50 h-20 rounded-lg flex flex-col items-center justify-center text-amber-600 border border-emerald-200">
-                <FaMoneyBillWave className="mb-1" />
-                <span className="text-xs text-emerald-700">EMI</span>
-              </div>
-              <div className="bg-emerald-50 h-20 rounded-lg flex flex-col items-center justify-center text-amber-600 border border-emerald-200">
-                <FaChartLine className="mb-1" />
-                <span className="text-xs text-emerald-700">Charts</span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Testimonials Card */}
@@ -153,16 +140,17 @@ function About() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
               <p className="text-emerald-700 text-sm italic mb-2">
-                "SmartSpendAI saved me hours on loan calculations! The interface is so intuitive."
+                "The budget planner and dashboard have transformed how I manage my finances. Highly recommend!"
               </p>
               <p className="text-emerald-600 text-xs font-medium">- User A</p>
             </div>
             <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
               <p className="text-emerald-700 text-sm italic mb-2">
-                "The tip calculator is a game-changer for dining out. No more mental math!"
+                "AI Chatbot gives spot-on advice, and the currency converter is perfect for my travels. Game-changer!"
               </p>
               <p className="text-emerald-600 text-xs font-medium">- User B</p>
             </div>
+            
           </div>
         </div>
 
@@ -174,7 +162,7 @@ function About() {
             </p>
           </div>
           <a
-            href="/calculator"
+            href="/home"
             className="mt-4 md:mt-0 inline-flex items-center py-2 px-4 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-all font-medium text-sm"
           >
             Get Started <FaArrowRight className="ml-2" />
