@@ -30,12 +30,7 @@ function Footer() {
               We help you track, plan, and optimize your finances with AI-powered insights.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">
-                <FaFacebook size={20} />
-              </a>
-              <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">
-                <FaTwitter size={20} />
-              </a>
+              
               <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">
                 <FaInstagram size={20} />
               </a>
@@ -82,11 +77,7 @@ function Footer() {
             <FaRegCopyright className="mr-1" />
             <span>{currentYear} SmartSpendAI. All rights reserved .</span>
           </div>
-          <div className="flex space-x-6 text-sm">
-            <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">Privacy Policy</a>
-            <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">Terms of Service</a>
-            <a href="#" className="text-emerald-100 hover:text-amber-400 transition-colors">Cookie Policy</a>
-          </div>
+          
         </div>
       </div>
     </footer>
